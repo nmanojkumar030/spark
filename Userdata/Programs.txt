@@ -1,0 +1,176 @@
+
+1. Create a RDD from text files
+
+By default looks in HDFS path:
+-----------------------------
+scala> val userData=spark.sparkContext.textFile("/home/npntraining/Desktop/Spark/dataset/u.user")             # Lazy Initialization
+userData: org.apache.spark.rdd.RDD[String] = /home/npntraining/Desktop/Spark/dataset/u.user MapPartitionsRDD[1] at textFile at <console>:23
+
+scala> :type userData
+org.apache.spark.rdd.RDD[String]
+
+scala> userData.count
+org.apache.hadoop.mapred.InvalidInputException: Input path does not exist: hdfs://localhost:9000/home/npntraining/Desktop/Spark/dataset/u.user
+  at org.apache.hadoop.mapred.FileInputFormat.singleThreadedListStatus(FileInputFormat.java:285)
+  at org.apache.hadoop.mapred.FileInputFormat.listStatus(FileInputFormat.java:228)
+  at org.apache.hadoop.mapred.FileInputFormat.getSplits(FileInputFormat.java:313)
+  at org.apache.spark.rdd.HadoopRDD.getPartitions(HadoopRDD.scala:200)
+  at org.apache.spark.rdd.RDD$$anonfun$partitions$2.apply(RDD.scala:253)
+  at org.apache.spark.rdd.RDD$$anonfun$partitions$2.apply(RDD.scala:251)
+  at scala.Option.getOrElse(Option.scala:121)
+  at org.apache.spark.rdd.RDD.partitions(RDD.scala:251)
+  at org.apache.spark.rdd.MapPartitionsRDD.getPartitions(MapPartitionsRDD.scala:35)
+  at org.apache.spark.rdd.RDD$$anonfun$partitions$2.apply(RDD.scala:253)
+  at org.apache.spark.rdd.RDD$$anonfun$partitions$2.apply(RDD.scala:251)
+  at scala.Option.getOrElse(Option.scala:121)
+  at org.apache.spark.rdd.RDD.partitions(RDD.scala:251)
+  at org.apache.spark.SparkContext.runJob(SparkContext.scala:2092)
+  at org.apache.spark.rdd.RDD.count(RDD.scala:1162)
+  ... 49 elided
+
+
+To look in Local File system
+----------------------------
+scala> val userData=spark.sparkContext.textFile("file:///home/npntraining/Desktop/Practice-Files/data-set/u.user")
+userData: org.apache.spark.rdd.RDD[String] = file:///home/npntraining/Desktop/Practice-Files/data-set/u.user MapPartitionsRDD[7] at textFile at <console>:23
+
+
+2. Operations of RDD
+
+scala> userData.count
+res2: Long = 943
+
+
+scala> userData.foreach(println)
+
+1|24|M|technician|85711
+2|53|F|other|94043
+3|23|M|writer|32067
+4|24|M|technician|43537
+5|33|F|other|15213
+6|42|M|executive|98101
+7|57|M|administrator|91344
+8|36|M|administrator|05201
+9|29|M|student|01002
+10|53|M|lawyer|90703
+11|39|F|other|30329
+12|28|F|other|06405
+13|47|M|educator|29206
+14|45|M|scientist|55106
+15|49|F|educator|97301
+16|21|M|entertainment|10309
+17|30|M|programmer|06355
+18|35|F|other|37212
+19|40|M|librarian|02138
+20|42|F|homemaker|95660
+21|26|M|writer|30068
+22|25|M|writer|40206
+23|30|F|artist|48197
+24|21|F|artist|94533
+25|39|M|engineer|55107
+26|49|M|engineer|21044
+27|40|F|librarian|30030
+28|32|M|writer|55369
+29|41|M|programmer|94043
+30|7|M|student|55436
+31|24|M|artist|10003
+32|28|F|student|78741
+33|23|M|student|27510
+.
+.
+.
+
+scala> userData.filter(line => {val fields = line.split("\\|"); fields(3).contains("technician")}).foreach(println)
+1|24|M|technician|85711
+4|24|M|technician|43537
+44|26|M|technician|46260
+77|30|M|technician|29379
+143|42|M|technician|08832
+197|55|M|technician|75094
+244|28|M|technician|80525
+294|34|M|technician|92110
+311|32|M|technician|73071
+325|48|M|technician|02139
+441|50|M|technician|55013
+456|24|M|technician|31820
+458|47|M|technician|Y1A6B
+488|48|M|technician|21012
+545|27|M|technician|08052
+670|30|M|technician|21114
+715|21|M|technician|91206
+717|24|M|technician|84105
+718|42|M|technician|64118
+738|35|M|technician|95403
+739|35|M|technician|73162
+790|27|M|technician|80913
+812|22|M|technician|76234
+832|24|M|technician|77042
+850|34|M|technician|78390
+889|24|M|technician|78704
+938|38|F|technician|55038
+
+
+val filteredData = userData.filter(line => {val fields = line.split("\\|");fields(3).contains("technician")})
+scala> filteredData.foreach(line => {val fields = line.split("\\|");println(fields(3)+" "+fields(4))})
+		technician 85711
+		technician 43537
+		technician 46260
+		technician 29379
+		technician 08832
+		technician 75094
+		technician 80525
+		technician 92110
+		technician 73071
+		technician 02139
+		technician 55013
+		technician 31820
+		technician Y1A6B
+		technician 21012
+		technician 08052
+		technician 21114
+		technician 91206
+		technician 84105
+		technician 64118
+		technician 95403
+		technician 73162
+		technician 80913
+		technician 76234
+		technician 77042
+		technician 78390
+		technician 78704
+		technician 55038
+
+		
+		
+		
+Create RDD from Collection
+--------------------------
+scala> val list = List(1,2,3,4,5,6,7,8,9)
+list: List[Int] = List(1, 2, 3, 4, 5, 6, 7, 8, 9)
+
+scala> val listRDD = spark.sparkContext.parallelize(list)
+listRDD: org.apache.spark.rdd.RDD[Int] = ParallelCollectionRDD[8] at parallelize at <console>:25
+
+scala> listRDD.foreach(println)
+1
+2
+3
+4
+5
+6
+7
+8
+9
+
+scala> listRDD.map(x=>x*2).foreach(println)
+2
+4
+6
+8
+10
+12
+14
+16
+18
+
+	
